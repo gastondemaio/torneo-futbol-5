@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Torneo de Fútbol 5</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2312452F'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='white' stroke-width='2'/%3E%3Cpath d='M16 3v26' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=1.3">
+</head>
+<body>
+
+<!-- ===================== ENCABEZADO: la cancha ===================== -->
+<header class="portada">
+    <div class="portada__contenido">
+        <p class="portada__semana" id="semana">Cargando torneo…</p>
+        <h1 class="portada__titulo">Torneo semanal de fútbol 5</h1>
+        <p class="portada__estado" id="estado-torneo"></p>
+        <nav class="portada__nav" aria-label="Secciones">
+            <a href="#inscripcion">Anotarme</a>
+            <a href="#inscriptos">Ver anotados</a>
+            <a href="#equipos">Ver equipos</a>
+            <a href="#tabla">Tabla</a>
+            <a href="#fixture">Fixture</a>
+        </nav>
+    </div>
+</header>
+
+<div class="aviso-conexion" id="aviso-version" hidden></div>
+
+<div class="aviso-conexion" id="aviso-conexion" hidden>
+    No hay conexión con el servidor en <code>localhost:8080</code>.
+    Levantalo con <code>mvn spring-boot:run</code> y recargá la página.
+</div>
+
+<main class="contenedor">
+
+    <div class="grilla">
+        <!-- ===================== FORMULARIO ===================== -->
+        <section class="panel" id="inscripcion" aria-labelledby="titulo-inscripcion">
+            <h2 id="titulo-inscripcion">Anotate para esta semana</h2>
+            <p class="panel__ayuda" id="ayuda-form">Completá tus datos. Si ya jugaste otra semana, usá el mismo email.</p>
+
+            <form id="form-inscripcion" novalidate>
+                <div class="campo-doble">
+                    <div class="campo">
+                        <label for="nombre">Nombre</label>
+                        <input id="nombre" name="nombre" type="text" maxlength="60" autocomplete="given-name" required>
+                    </div>
+                    <div class="campo">
+                        <label for="apellido">Apellido</label>
+                        <input id="apellido" name="apellido" type="text" maxlength="60" autocomplete="family-name" required>
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" maxlength="120" autocomplete="email" required>
+                </div>
+
+                <fieldset class="posiciones">
+                    <legend>Posición preferida</legend>
+                    <label class="posicion">
+                        <input type="radio" name="posicion" value="ARQUERO" required>
+                        <span>Arquero</span>
+                    </label>
+                    <label class="posicion">
+                        <input type="radio" name="posicion" value="DEFENSOR">
+                        <span>Defensor</span>
+                    </label>
+                    <label class="posicion">
+                        <input type="radio" name="posicion" value="DELANTERO">
+                        <span>Delantero</span>
+                    </label>
+                </fieldset>
+
+                <button type="submit" class="boton boton--principal" id="boton-inscribir">Anotarme</button>
+                <div class="mensaje" id="mensaje-form" role="status" aria-live="polite"></div>
+            </form>
+        </section>
+
+        <!-- ===================== LISTADO ===================== -->
+        <section class="panel" id="inscriptos" aria-labelledby="titulo-inscriptos">
+            <div class="panel__encabezado">
+                <h2 id="titulo-inscriptos">Anotados</h2>
+                <p class="panel__resumen" id="resumen-posiciones"></p>
+            </div>
+            <div class="tabla-envoltura">
+                <table class="tabla">
+                    <thead>
+                    <tr>
+                        <th scope="col" class="col-num">#</th>
+                        <th scope="col">Jugador</th>
+                        <th scope="col">Posición</th>
+                        <th scope="col" class="col-acciones"><span class="solo-lector">Acciones</span></th>
+                    </tr>
+                    </thead>
+                    <tbody id="tabla-inscriptos"></tbody>
+                </table>
+            </div>
+            <p class="vacio" id="sin-inscriptos" hidden>Todavía no se anotó nadie. Sé el primero con el formulario.</p>
+        </section>
+    </div>
+
+    <!-- ===================== ADMINISTRACIÓN ===================== -->
+    <section class="admin" aria-labelledby="titulo-admin">
+        <div class="admin__texto">
+            <h2 id="titulo-admin">Organizador</h2>
+            <p id="admin-ayuda">El sorteo arma hasta 8 equipos de 5 al azar, con un arquero por equipo cuando hay, y el fixture todos contra todos para el sábado y el domingo. Los que sobran quedan de suplentes.</p>
+        </div>
+        <div class="admin__acciones">
+            <button type="button" class="boton boton--pechera" id="boton-sortear">Sortear equipos</button>
+            <button type="button" class="boton boton--secundario" id="boton-anular" hidden>Anular sorteo</button>
+            <button type="button" class="boton boton--peligro" id="boton-borrar-todos">Borrar anotados</button>
+            <div class="demo">
+                <label for="cantidad-demo">Jugadores de prueba</label>
+                <input id="cantidad-demo" type="number" min="1" max="48" value="23">
+                <button type="button" class="boton boton--secundario" id="boton-demo">Cargar</button>
+            </div>
+        </div>
+        <div class="mensaje mensaje--admin" id="mensaje-admin" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- ===================== EQUIPOS ===================== -->
+    <section class="equipos" id="equipos" aria-labelledby="titulo-equipos">
+        <h2 id="titulo-equipos">Equipos</h2>
+        <ul class="advertencias" id="advertencias"></ul>
+        <div class="equipos__grilla" id="grilla-equipos"></div>
+        <p class="vacio" id="sin-equipos">Los equipos aparecen acá cuando el organizador hace el sorteo.</p>
+    </section>
+
+    <!-- ===================== TABLA DE POSICIONES ===================== -->
+    <section class="seccion" id="tabla" aria-labelledby="titulo-tabla">
+        <div class="seccion__encabezado">
+            <h2 id="titulo-tabla">Tabla de posiciones</h2>
+            <p class="seccion__progreso" id="progreso-tabla"></p>
+        </div>
+        <div id="campeon"></div>
+        <div class="tabla-pos-envoltura" id="contenedor-tabla"></div>
+        <p class="reglas" id="reglas-tabla" hidden>
+            Partido ganado 3 puntos, empatado 1, perdido 0. Gana el torneo el que más puntos suma.
+            Con igualdad de puntos desempata la diferencia de gol, después los goles a favor y por último un sorteo.
+        </p>
+        <p class="vacio" id="sin-tabla">La tabla aparece cuando se sortean los equipos.</p>
+    </section>
+
+    <!-- ===================== FIXTURE Y RESULTADOS ===================== -->
+    <section class="seccion" id="fixture" aria-labelledby="titulo-fixture">
+        <div class="seccion__encabezado">
+            <h2 id="titulo-fixture">Fixture</h2>
+            <p class="seccion__progreso" id="progreso-fixture"></p>
+        </div>
+        <div id="fixture-contenido" hidden>
+            <div class="pestanas" role="tablist" aria-label="Día de juego" id="pestanas-dias"></div>
+            <p class="fixture__ayuda">Cargá los goles de cada partido y tocá Guardar. La tabla se actualiza sola.</p>
+            <div class="mensaje" id="mensaje-fixture" role="status" aria-live="polite"></div>
+            <div class="jornadas" id="panel-fixture" role="tabpanel"></div>
+        </div>
+        <p class="vacio" id="sin-fixture">El fixture se arma al sortear: todos contra todos, repartido entre el sábado y el domingo.</p>
+    </section>
+
+</main>
+
+<footer class="pie">
+    MVP para el Taller Integrador. Backend en Java con Spring Boot, frontend en JavaScript.
+</footer>
+
+<script src="js/app.js?v=1.3"></script>
+</body>
+</html>

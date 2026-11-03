@@ -1,0 +1,91 @@
+// Diagrama Entidad-Relación (modelo lógico) — Torneo Fútbol 5
+// Generar imagen:  dot -Tpng docs/der.dot -o docs/der.png
+digraph DER {
+    graph [rankdir=LR, splines=polyline, nodesep=0.7, ranksep=1.1, bgcolor="white", pad=0.3,
+           label="Modelo entidad-relación — Torneo semanal de Fútbol 5", labelloc=t, fontsize=18, fontname="Helvetica-Bold"];
+    node  [shape=plain, fontname="Helvetica", fontsize=11];
+    edge  [fontname="Helvetica", fontsize=10, color="#12452F", arrowsize=0.8];
+
+    jugador [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#12452F">
+        <tr><td bgcolor="#12452F" colspan="2"><font color="white"><b>JUGADOR</b></font></td></tr>
+        <tr><td align="left"><b>PK</b></td><td align="left">id BIGINT</td></tr>
+        <tr><td></td><td align="left">nombre VARCHAR(60)</td></tr>
+        <tr><td></td><td align="left">apellido VARCHAR(60)</td></tr>
+        <tr><td><b>UK</b></td><td align="left">email VARCHAR(120)</td></tr>
+        <tr><td></td><td align="left">posicion VARCHAR(20)</td></tr>
+        <tr><td></td><td align="left">fecha_alta TIMESTAMP</td></tr>
+      </table>>];
+
+    torneo [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#12452F">
+        <tr><td bgcolor="#12452F" colspan="2"><font color="white"><b>TORNEO</b></font></td></tr>
+        <tr><td align="left"><b>PK</b></td><td align="left">id BIGINT</td></tr>
+        <tr><td></td><td align="left">nombre VARCHAR(100)</td></tr>
+        <tr><td><b>UK</b></td><td align="left">fecha_inicio DATE</td></tr>
+        <tr><td></td><td align="left">fecha_fin DATE</td></tr>
+        <tr><td></td><td align="left">estado VARCHAR(20)</td></tr>
+        <tr><td></td><td align="left">fecha_sorteo TIMESTAMP</td></tr>
+      </table>>];
+
+    inscripcion [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#12452F">
+        <tr><td bgcolor="#185A3D" colspan="2"><font color="white"><b>INSCRIPCION</b></font></td></tr>
+        <tr><td align="left"><b>PK</b></td><td align="left">id BIGINT</td></tr>
+        <tr><td align="left"><b>FK</b></td><td align="left">torneo_id BIGINT</td></tr>
+        <tr><td align="left"><b>FK</b></td><td align="left">jugador_id BIGINT</td></tr>
+        <tr><td></td><td align="left">fecha_inscripcion TIMESTAMP</td></tr>
+        <tr><td colspan="2" align="left"><i>UK (torneo_id, jugador_id)</i></td></tr>
+      </table>>];
+
+    equipo [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#12452F">
+        <tr><td bgcolor="#12452F" colspan="2"><font color="white"><b>EQUIPO</b></font></td></tr>
+        <tr><td align="left"><b>PK</b></td><td align="left">id BIGINT</td></tr>
+        <tr><td align="left"><b>FK</b></td><td align="left">torneo_id BIGINT</td></tr>
+        <tr><td></td><td align="left">numero INT</td></tr>
+        <tr><td></td><td align="left">nombre VARCHAR(60)</td></tr>
+        <tr><td colspan="2" align="left"><i>UK (torneo_id, numero)</i></td></tr>
+      </table>>];
+
+    equipo_jugador [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#12452F">
+        <tr><td bgcolor="#185A3D" colspan="2"><font color="white"><b>EQUIPO_JUGADOR</b></font></td></tr>
+        <tr><td align="left"><b>PK</b></td><td align="left">id BIGINT</td></tr>
+        <tr><td align="left"><b>FK</b></td><td align="left">equipo_id BIGINT</td></tr>
+        <tr><td align="left"><b>FK</b></td><td align="left">jugador_id BIGINT</td></tr>
+        <tr><td></td><td align="left">rol VARCHAR(10)  TITULAR | SUPLENTE</td></tr>
+        <tr><td></td><td align="left">orden INT</td></tr>
+        <tr><td colspan="2" align="left"><i>UK (equipo_id, jugador_id)</i></td></tr>
+      </table>>];
+
+    partido [label=<
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="5" color="#12452F">
+        <tr><td bgcolor="#185A3D" colspan="2"><font color="white"><b>PARTIDO</b></font></td></tr>
+        <tr><td align="left"><b>PK</b></td><td align="left">id BIGINT</td></tr>
+        <tr><td align="left"><b>FK</b></td><td align="left">torneo_id BIGINT</td></tr>
+        <tr><td></td><td align="left">jornada INT  (fecha 1..7)</td></tr>
+        <tr><td></td><td align="left">dia VARCHAR(10)  SABADO | DOMINGO</td></tr>
+        <tr><td></td><td align="left">fecha DATE</td></tr>
+        <tr><td></td><td align="left">orden INT</td></tr>
+        <tr><td align="left"><b>FK</b></td><td align="left">equipo_local_id BIGINT</td></tr>
+        <tr><td align="left"><b>FK</b></td><td align="left">equipo_visitante_id BIGINT</td></tr>
+        <tr><td></td><td align="left">goles_local INT  (NULL = sin jugar)</td></tr>
+        <tr><td></td><td align="left">goles_visitante INT</td></tr>
+        <tr><td colspan="2" align="left"><i>UK (torneo_id, equipo_local_id, equipo_visitante_id)</i></td></tr>
+      </table>>];
+
+    // Relaciones (cardinalidad: 1 ── N)
+    torneo  -> inscripcion    [label="1 : N\nrecibe", arrowhead=crow, arrowtail=tee, dir=both];
+    jugador -> inscripcion    [label="1 : N\nrealiza", arrowhead=crow, arrowtail=tee, dir=both];
+    torneo  -> equipo         [label="1 : N\ngenera", arrowhead=crow, arrowtail=tee, dir=both];
+    equipo  -> equipo_jugador [label="1 : N\nse compone de", arrowhead=crow, arrowtail=tee, dir=both];
+    jugador -> equipo_jugador [label="1 : N\nintegra", arrowhead=crow, arrowtail=tee, dir=both];
+    torneo  -> partido        [label="1 : N\nprograma", arrowhead=crow, arrowtail=tee, dir=both];
+    equipo  -> partido        [label="1 : N\njuega de local", arrowhead=crow, arrowtail=tee, dir=both];
+    equipo  -> partido        [label="1 : N\njuega de visitante", arrowhead=crow, arrowtail=tee, dir=both];
+
+    { rank=same; jugador; torneo; }
+    { rank=same; inscripcion; equipo; }
+    { rank=same; equipo_jugador; partido; }
+}
